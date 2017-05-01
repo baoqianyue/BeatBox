@@ -10,11 +10,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import java.util.List;
+
 /**
  * Created by 鲍骞月 on 2017/4/29.
  */
 
 public class BeatBoxFragment extends Fragment {
+
+    private BeatBox mBeatBox;
 
     public static BeatBoxFragment newInstance() {
         return new BeatBoxFragment();
@@ -28,23 +32,46 @@ public class BeatBoxFragment extends Fragment {
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.
                 fragment_beat_box_recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
-        recyclerView.setAdapter(new SoundAdapter());
+        recyclerView.setAdapter(new SoundAdapter(mBeatBox.getSounds()));
         return view;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mBeatBox = new BeatBox(getContext());
+    }
 
     private class SoundViewHolder extends RecyclerView.ViewHolder {
 
         private Button mButton;
+        private Sound mSound;
 
         public SoundViewHolder(LayoutInflater inflater, ViewGroup container) {
             super(inflater.inflate(R.layout.list_item_sound, container, false));
 
             mButton = (Button) itemView.findViewById(R.id.list_item_sound_button);
         }
+
+        /**
+         * 这里使用这个绑定方法会整合视图和数据的绑定过程，之后在Adapter中只需调用
+         * 一下这个方法就能完成绑定任务
+         *
+         * @param sound
+         */
+        public void bindSound(Sound sound) {
+            mSound = sound;
+            mButton.setText(sound.getName());
+        }
     }
 
     private class SoundAdapter extends RecyclerView.Adapter<SoundViewHolder> {
+        private List<Sound> mSounds;
+
+        public SoundAdapter(List<Sound> sounds) {
+            mSounds = sounds;
+        }
 
         @Override
         public SoundViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -54,12 +81,13 @@ public class BeatBoxFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(SoundViewHolder holder, int position) {
-
+            Sound sound = mSounds.get(position);
+            holder.bindSound(sound);
         }
 
         @Override
         public int getItemCount() {
-            return 0;
+            return mSounds.size();
         }
     }
 }
